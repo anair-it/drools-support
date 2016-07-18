@@ -68,8 +68,12 @@ public class RulesExecutionTest {
 	
 		replay(mockStatelessKieSession, mockAgendaEventListener);
 		
+		List<Object> factList = new ArrayList<Object>();
+		factList.add("fact1");
+		factList.add("fact2");
+		
 		new RulesExecution(mockStatelessKieSession)
-			.addFacts("fact1", "fact2")
+			.addFacts(factList)
 			.addGlobal("g1", "g1")
 			.addGlobal("g2", "g2")
 			.addEventListeners(eventListeners)

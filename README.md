@@ -24,7 +24,7 @@
 ### Fire rules on a stateless session
 
 		new RulesExecution(statelessKieSession) //Constructor-arg accepts KieSession or StatelessKieSession
-			.addFacts(fact1, fact2) //Array of fact objects
+			.addFacts(factList) //List of fact objects
 			.addGlobal(globalVariable1, globalObject1) //Optional global
 			.addGlobal(globalVariable2, globalObject2) //Optional global
 			.addEventListeners(myAgendaListsner, myProcessListener) //Optional ArrayList/Array of Listeners 

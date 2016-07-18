@@ -31,8 +31,20 @@ public class RulesExecution {
 		this.statelessKieSession = statelessKieSession;
 	}
 
+	@SuppressWarnings("unchecked")
 	public RulesExecution addFacts(Object... facts){
-		this.facts.addAll(Arrays.asList(facts));
+		boolean isTypeList = false;
+		for(Object fact: facts){
+			if(fact instanceof List){
+				isTypeList = true;
+				this.facts.addAll((List<Object>)fact);
+			}else{
+				isTypeList = false;
+			}
+		}
+		if(! isTypeList){
+			this.facts.addAll(Arrays.asList(facts));
+		}
 		return this;
 	}
 	

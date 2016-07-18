@@ -7,11 +7,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.anair.drools.model.FiredRulesReturnValues;
 import org.kie.api.event.process.ProcessEventListener;
 import org.kie.api.event.rule.AgendaEventListener;
 import org.kie.api.event.rule.RuleRuntimeEventListener;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.StatelessKieSession;
+import org.kie.api.runtime.rule.FactHandle;
 
 public class RulesExecution {
 		
@@ -76,7 +78,7 @@ public class RulesExecution {
 		return this;
 	}
 	
-	public int fireRules(){
+	public FiredRulesReturnValues fireRules(){
 		if(this.facts.isEmpty()){
 			throw new IllegalAccessError("Cannot fire rules without facts. Set atleast 1 fact");
 		}
@@ -87,15 +89,18 @@ public class RulesExecution {
 			fireStatelessKieSessionRules();
 		}
 		
-		return 0;
+		return new FiredRulesReturnValues();
 	}
 
-	private int fireKieSessionRules() {
+	private FiredRulesReturnValues fireKieSessionRules() {
+		FiredRulesReturnValues firedRulesReturnValues = new FiredRulesReturnValues();
+		
 		for(Map.Entry<String, Object> entry: globals.entrySet()){
 			kieSession.setGlobal(entry.getKey(), entry.getValue());
 		}
 		for(Object fact: facts){
-			kieSession.insert(fact);
+			FactHandle factHandle = kieSession.insert(fact);
+			firedRulesReturnValues.addFactHandle(factHandle);
 		}
 		
 		for(EventListener eventListener: eventListeners){
@@ -113,7 +118,10 @@ public class RulesExecution {
 				this.kieSession.getAgenda().getAgendaGroup(agendaGroupName).setFocus();
 			}
 		}
-		return kieSession.fireAllRules();
+		
+		int numberOfRulesFired = kieSession.fireAllRules();
+		firedRulesReturnValues.setNumberOfRulesFired(numberOfRulesFired);
+		return firedRulesReturnValues;
 	}
 	
 	private void fireStatelessKieSessionRules(){

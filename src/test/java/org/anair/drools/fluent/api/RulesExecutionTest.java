@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.anair.drools.model.FiredRulesReturnValues;
 import org.junit.Before;
 import org.junit.Test;
 import org.kie.api.event.process.ProcessEventListener;
@@ -51,10 +52,13 @@ public class RulesExecutionTest {
 		expectLastCall();
 		replay(mockStatelessKieSession);
 		
-		new RulesExecution(mockStatelessKieSession)
+		FiredRulesReturnValues firedRulesReturnValues = new RulesExecution(mockStatelessKieSession)
 			.addFacts("fact1", "fact2")
 			.fireRules();
 		verify(mockStatelessKieSession);
+		
+		assertNull(firedRulesReturnValues.getNumberOfRulesFired());
+		assertTrue(firedRulesReturnValues.getFactHandles().isEmpty());
 	}
 	
 	@Test
@@ -72,13 +76,16 @@ public class RulesExecutionTest {
 		factList.add("fact1");
 		factList.add("fact2");
 		
-		new RulesExecution(mockStatelessKieSession)
+		FiredRulesReturnValues firedRulesReturnValues = new RulesExecution(mockStatelessKieSession)
 			.addFacts(factList)
 			.addGlobal("g1", "g1")
 			.addGlobal("g2", "g2")
 			.addEventListeners(eventListeners)
 			.fireRules();
 		verify(mockStatelessKieSession, mockAgendaEventListener);
+		
+		assertNull(firedRulesReturnValues.getNumberOfRulesFired());
+		assertTrue(firedRulesReturnValues.getFactHandles().isEmpty());
 	}
 	
 	@Test(expected=IllegalAccessError.class)
@@ -94,11 +101,14 @@ public class RulesExecutionTest {
 		expect(mockKieSession.fireAllRules()).andReturn(10);
 		replay(mockKieSession, mockFactHandle);
 		
-		new RulesExecution(mockKieSession)
+		FiredRulesReturnValues firedRulesReturnValues = new RulesExecution(mockKieSession)
 			.addFacts("fact1", "fact2")
 			.fireRules();
 		
 		verify(mockKieSession, mockFactHandle);
+		
+		assertEquals(10, firedRulesReturnValues.getNumberOfRulesFired().intValue());
+		assertEquals(2, firedRulesReturnValues.getFactHandles().size());
 	}
 	
 	@Test
@@ -125,7 +135,7 @@ public class RulesExecutionTest {
 		globals.put("g1", "g1");
 		globals.put("g2", "g2");
 		
-		int rulesFiredCount = new RulesExecution(mockKieSession)
+		FiredRulesReturnValues firedRulesReturnValues = new RulesExecution(mockKieSession)
 			.addFacts("fact1", "fact2")
 			.addGlobals(globals)
 			.addEventListeners(mockAgendaEventListener, mockProcessEventListener, mockRuleRuntimeEventListener)
@@ -134,7 +144,8 @@ public class RulesExecutionTest {
 		
 		verify(mockKieSession, mockFactHandle, mockAgenda, mockAgendaGroup);
 		
-		assertEquals(rulesFiredCount, 10);
+		assertEquals(10, firedRulesReturnValues.getNumberOfRulesFired().intValue());
+		assertEquals(2, firedRulesReturnValues.getFactHandles().size());
 	}
 	
 	@Test(expected=IllegalArgumentException.class)

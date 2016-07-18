@@ -30,11 +30,19 @@ public class SessionBuilder {
 		}
 	}
 	
+	public KieSession fetchKieSession(){
+		return fetchKieSession(null);
+	}
+	
 	public StatelessKieSession fetchStatelessKieSession(String sessionName){
 		if(StringUtils.isBlank(sessionName)){
 			return this.kieContainer.newStatelessKieSession();
 		}else{
 			return this.kieContainer.newStatelessKieSession(sessionName);
 		}
+	}
+	
+	public StatelessKieSession fetchStatelessKieSession(){
+		return fetchStatelessKieSession(null);
 	}
 }

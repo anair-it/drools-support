@@ -10,14 +10,16 @@
 
 ## Fluent API usage
 ### Get a stateless Kie session:
+- If no session name is provided, the default session will be identified and returned
 		
 		StatelessKieSession statelessKieSession = new SessionBuilder("foo.bar:bar-knowledge:1.0.0")
-			.fetchStatelessKieSession("bar.kbase.stateless.session");
+			.fetchStatelessKieSession("bar.kbase.stateless.session");  //No-arg method will fetch default session
 			
 ### Get a stateful Kie session:
 		
 		KieSession statefulKieSession = new SessionBuilder("foo.bar", "bar-knowledge", "1.0.0")
-			.fetchKieSession("bar.kbase.stateful.session");
+			.fetchKieSession("bar.kbase.stateful.session"); //No-arg method will fetch default session
+
 
 ### Fire rules on a stateless session
 

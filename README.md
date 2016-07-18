@@ -11,14 +11,12 @@
 ## Fluent API usage
 ### Get a stateless Kie session:
 		
-		StatelessKieSession statelessKieSession = new SessionBuilder()
-			.withReleaseId("foo.bar:bar-knowledge:1.0.0")
+		StatelessKieSession statelessKieSession = new SessionBuilder("foo.bar:bar-knowledge:1.0.0")
 			.fetchStatelessKieSession("bar.kbase.stateless.session");
 			
 ### Get a stateful Kie session:
 		
-		KieSession statefulKieSession = new SessionBuilder()
-			.withReleaseId("foo.bar:bar-knowledge:1.0.0")
+		KieSession statefulKieSession = new SessionBuilder("foo.bar", "bar-knowledge", "1.0.0")
 			.fetchKieSession("bar.kbase.stateful.session");
 
 ### Fire rules on a stateless session

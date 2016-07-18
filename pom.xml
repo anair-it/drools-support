@@ -4,7 +4,7 @@
 	<groupId>org.anair</groupId>
 	<artifactId>drools-support</artifactId>
 	<version>0.0.1</version>
-	<name>Drools unit testing support project</name>
+	<name>Drools support project</name>
 
 	<properties>
 		<kie.version>6.4.0.Final</kie.version>

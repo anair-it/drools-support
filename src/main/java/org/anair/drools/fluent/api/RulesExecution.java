@@ -36,11 +36,6 @@ public class RulesExecution {
 		return this;
 	}
 	
-	public RulesExecution addFacts(List<Object> facts){
-		this.facts.addAll(facts);
-		return this;
-	}
-	
 	public RulesExecution addEventListeners(EventListener... eventListeners){
 		this.eventListeners.addAll(Arrays.asList(eventListeners));
 		return this;
@@ -70,6 +65,10 @@ public class RulesExecution {
 	}
 	
 	public int fireRules(){
+		if(this.facts.isEmpty()){
+			throw new IllegalAccessError("Cannot fire rules without facts. Set atleast 1 fact");
+		}
+		
 		if(this.kieSession != null){
 			return fireKieSessionRules();
 		}else if(this.statelessKieSession != null){
@@ -97,8 +96,10 @@ public class RulesExecution {
 			}
 		}
 		
-		for(String agendaGroupName: this.agendaGroupNames){
-			kieSession.getAgenda().getAgendaGroup(agendaGroupName).setFocus();
+		if(agendaGroupNames != null && agendaGroupNames.length > 0){
+			for(String agendaGroupName: this.agendaGroupNames){
+				this.kieSession.getAgenda().getAgendaGroup(agendaGroupName).setFocus();
+			}
 		}
 		return kieSession.fireAllRules();
 	}

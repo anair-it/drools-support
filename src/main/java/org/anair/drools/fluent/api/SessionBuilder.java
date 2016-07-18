@@ -10,18 +10,21 @@ import org.kie.api.runtime.StatelessKieSession;
 
 public class SessionBuilder {
 
-	private KieContainer kieContainer;
+	protected KieContainer kieContainer;
 	
 	public SessionBuilder(String groupId, String artifactId, String version) {
-		KieServices kieServices = KieServices.Factory.get();
-		this.kieContainer = kieServices.newKieContainer(kieServices.newReleaseId(groupId, artifactId, version));
-	}
-	
-	public SessionBuilder(String releaseId) {
-		KieServices kieServices = KieServices.Factory.get();
-		this.kieContainer = kieServices.newKieContainer(new ReleaseIdImpl(releaseId));
+		this.kieContainer = registerKieContainer(groupId+":"+artifactId+":"+version);
 	}
 
+	public SessionBuilder(String releaseId) {
+		this.kieContainer = registerKieContainer(releaseId);
+	}
+
+	public KieContainer registerKieContainer(String releaseId) {
+		KieServices kieServices = KieServices.Factory.get();
+		return kieServices.newKieContainer(new ReleaseIdImpl(releaseId));
+	}
+	
 	public KieSession fetchKieSession(String sessionName){
 		if(StringUtils.isBlank(sessionName)){
 			return this.kieContainer.newKieSession();

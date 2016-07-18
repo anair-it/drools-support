@@ -1,9 +1,10 @@
-package org.anair.drools.test;
+package org.anair.drools.test.listener;
 
 
 import org.anair.drools.fluent.api.RulesExecution;
 import org.anair.drools.test.annotation.StatelessKSession;
 import org.anair.drools.test.listener.DroolsTestExecutionListener;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.api.cdi.KReleaseId;
@@ -24,6 +25,7 @@ public class SimpleTest {
 	@KSession("bar.kbase.stateful.session")
 	private KieSession statefulKieSession;
 	
+	@Ignore //This is not a runnable test. Just a sample
 	@Test
 	public void statelessSession_test_sample(){
 		new RulesExecution(statelessKieSession)

@@ -79,15 +79,15 @@ Print rules that got fired for a transaction along with execution stats. This is
 
 - Add the following calls to _RulesExecution_
 			
-		.addContext("user", "userid") //Add diagnostic context to  rules logging
+		.addContext("user", "USER1") //Add diagnostic context to  rules logging
 		.addContext("key", "123") //Add diagnostic context to  rules logging
 		.fireRules(); 
 
 - Run a test and you should see the file _rules-audit.log_ generated with log statements that look like:
 
-		2016-07-29 12:10:08,516 [USER1][key1-123]- Rule -> My rule 1  | Stats -> matchesCreated=1 matchesCancelled=0 matchesFired=1 firingTime=7ms
-		2016-07-29 12:10:08,516 [USER2][key1-233]- Rule -> My rule 2  | Stats -> matchesCreated=1 matchesCancelled=0 matchesFired=1 firingTime=1ms
-		2016-07-29 12:10:08,516 [USER2][key1-233]- Rule -> My rule 3  | Stats -> matchesCreated=1 matchesCancelled=0 matchesFired=1 firingTime=1ms
+		2016-07-29 12:10:08,516 [USER1][123]- Rule -> My rule 1  | Stats -> matchesCreated=1 matchesCancelled=0 matchesFired=1 firingTime=7ms
+		2016-07-29 12:10:08,516 [USER1][123]- Rule -> My rule 2  | Stats -> matchesCreated=1 matchesCancelled=0 matchesFired=1 firingTime=1ms
+		2016-07-29 12:10:08,516 [USER1][123]- Rule -> My rule 3  | Stats -> matchesCreated=1 matchesCancelled=0 matchesFired=1 firingTime=1ms
 - Disable this feature by changing the log level of rules-audit to WARN/ERROR.
 
 ### Trace log

@@ -5,6 +5,7 @@
 # Version
 - JDK: >6
 - Maven: 3.x
+- Spring: > 3.2
 - Drools: 6.4.0.Final
 
 ## Getting started
@@ -57,6 +58,8 @@
 		log4j.category.org.kie=INFO
 		log4j.category.org.eclipse=ERROR
 		log4j.category.org.anair=INFO
+		log4j.category.org.springframework=ERROR
+		log4j.category.org.apache=ERROR
 		
 
 ## Audit and deep tracing
@@ -112,6 +115,7 @@ This IT specific feature generates a drools audit log with the rules that got ex
 		log4j.category.org.kie=INFO
 		log4j.category.org.eclipse=ERROR
 		log4j.category.org.anair.drools=INFO
+		log4j.category.org.springframework=ERROR
 
 - Use the following annotations to help with Drools testing
 	- _KReleaseId_: Enter knowledge module GAV at the Test class level
@@ -128,4 +132,9 @@ This IT specific feature generates a drools audit log with the rules that got ex
 	- Open Drools Audit view in Eclipse
 	- Drag rules-trace.log to the view
 	- You should see all the rules that got executed along with the fact models that triggered the execution 
-	- Rules that got fired along with performance stat is printde in the console
+	- Rules that got fired along with performance stat is printed in the console
+	
+# Reference
+[Drools 6.4.0.Final reference](https://docs.jboss.org/drools/release/6.4.0.Final/drools-docs/html_single/#d0e1087)
+[Drools 6.4.0.Final Jira](https://docs.jboss.org/drools/release/6.4.0.Final/drools-docs/html_single/#d0e1087)
+	

@@ -1,7 +1,6 @@
 package org.anair.drools.fluent.api;
 
 import org.anair.drools.provider.session.KieSessionProvider;
-import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.StatelessKieSession;
 
@@ -15,7 +14,6 @@ import org.kie.api.runtime.StatelessKieSession;
 public class SessionBuilder {
 	
 	public static final String DEFAULT_SESSION_NAME = "DEFAULT";
-	protected KieContainer kieContainer;
 	private KieSessionProvider kieSessionProvider;
 	private long pollingIntervalMillis = 0;
 	private String releaseId;

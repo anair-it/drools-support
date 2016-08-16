@@ -13,14 +13,17 @@ import java.util.Map;
 import org.anair.drools.model.FiredRulesReturnValues;
 import org.junit.Before;
 import org.junit.Test;
+import org.kie.api.command.BatchExecutionCommand;
 import org.kie.api.event.process.ProcessEventListener;
 import org.kie.api.event.rule.AgendaEventListener;
 import org.kie.api.event.rule.RuleRuntimeEventListener;
+import org.kie.api.runtime.ExecutionResults;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.StatelessKieSession;
 import org.kie.api.runtime.rule.Agenda;
 import org.kie.api.runtime.rule.AgendaGroup;
 import org.kie.api.runtime.rule.FactHandle;
+
 
 public class RulesExecutionTest {
 	
@@ -48,15 +51,18 @@ public class RulesExecutionTest {
 
 	@Test
 	public void fireRules_OnStatelessSession_MinimalConfiguration() {
+		RulesExecution rulesExecution = new RulesExecution(mockStatelessKieSession);
+		rulesExecution.setTraceFileName("dummyfile");
+		
+		mockStatelessKieSession.addEventListener(isA(AgendaEventListener.class));
 		mockStatelessKieSession.execute(Arrays.asList("fact1", "fact2"));
 		expectLastCall();
 		replay(mockStatelessKieSession);
-		
-		FiredRulesReturnValues firedRulesReturnValues = new RulesExecution(mockStatelessKieSession)
+		FiredRulesReturnValues firedRulesReturnValues = rulesExecution
 			.addFacts("fact1", "fact2")
-			.fireRules();
+			.auditTrace("target")
+			.fireRules(false);
 		verify(mockStatelessKieSession);
-		
 		assertNull(firedRulesReturnValues.getNumberOfRulesFired());
 		assertTrue(firedRulesReturnValues.getFactHandles().isEmpty());
 	}
@@ -64,6 +70,7 @@ public class RulesExecutionTest {
 	@Test
 	public void fireRules_OnStatelessSession_AllConfiguration() {
 		mockStatelessKieSession.addEventListener(mockAgendaEventListener);
+		mockStatelessKieSession.addEventListener(isA(AgendaEventListener.class));
 		mockStatelessKieSession.setGlobal("g1", "g1");
 		mockStatelessKieSession.setGlobal("g2", "g2");
 		mockStatelessKieSession.execute(Arrays.asList("fact1", "fact2"));
@@ -75,14 +82,48 @@ public class RulesExecutionTest {
 		List<Object> factList = new ArrayList<Object>();
 		factList.add("fact1");
 		factList.add("fact2");
-		
 		FiredRulesReturnValues firedRulesReturnValues = new RulesExecution(mockStatelessKieSession)
 			.addFacts(factList)
 			.addGlobal("g1", "g1")
 			.addGlobal("g2", "g2")
+			.addContext("form", "MD115")
+			.addContext("form1", null)
 			.addEventListeners(eventListeners)
-			.fireRules();
+			.fireRules(false);
 		verify(mockStatelessKieSession, mockAgendaEventListener);
+		
+		assertNull(firedRulesReturnValues.getNumberOfRulesFired());
+		assertTrue(firedRulesReturnValues.getFactHandles().isEmpty());
+	}
+	
+	@Test
+	public void fireRules_OnStatelessSession_AllConfiguration_disableListeners() {
+		mockStatelessKieSession.setGlobal("g1", "g1");
+		mockStatelessKieSession.setGlobal("g2", "g2");
+		mockStatelessKieSession.execute(Arrays.asList("fact1", "fact2"));
+		List<EventListener> eventListeners = new ArrayList<EventListener>();
+		eventListeners.add(mockAgendaEventListener);
+	
+		replay(mockStatelessKieSession);
+		
+		Map<String,String> contextMap = new HashMap<String, String>();
+		contextMap.put("var1", "MD115");
+		contextMap.put("var2", null);
+		contextMap.put("var3", "    ");
+		contextMap.put("var4", "");
+		
+		List<Object> factList = new ArrayList<Object>();
+		factList.add("fact1");
+		factList.add("fact2");
+		FiredRulesReturnValues firedRulesReturnValues = new RulesExecution(mockStatelessKieSession)
+			.addFacts(factList)
+			.addGlobal("g1", "g1")
+			.addGlobal("g2", "g2")
+			.addContext(contextMap)
+			.addEventListeners(eventListeners)
+			.enableListeners(false)
+			.fireRules(false);
+		verify(mockStatelessKieSession);
 		
 		assertNull(firedRulesReturnValues.getNumberOfRulesFired());
 		assertTrue(firedRulesReturnValues.getFactHandles().isEmpty());
@@ -98,6 +139,7 @@ public class RulesExecutionTest {
 	public void fireRules_OnStatefulSession_MinimalConfiguration() {
 		expect(mockKieSession.insert("fact1")).andStubReturn(mockFactHandle);
 		expect(mockKieSession.insert("fact2")).andStubReturn(mockFactHandle);
+		mockKieSession.addEventListener(isA(AgendaEventListener.class));
 		expect(mockKieSession.fireAllRules()).andReturn(10);
 		replay(mockKieSession, mockFactHandle);
 		
@@ -116,6 +158,7 @@ public class RulesExecutionTest {
 		mockKieSession.addEventListener(mockAgendaEventListener);
 		mockKieSession.addEventListener(mockProcessEventListener);
 		mockKieSession.addEventListener(mockRuleRuntimeEventListener);
+		mockKieSession.addEventListener(isA(AgendaEventListener.class));
 		
 		mockKieSession.setGlobal("g1", "g1");
 		mockKieSession.setGlobal("g2", "g2");
@@ -148,14 +191,46 @@ public class RulesExecutionTest {
 		assertEquals(2, firedRulesReturnValues.getFactHandles().size());
 	}
 	
-	@Test(expected=IllegalArgumentException.class)
-	public void fireRules_WithAgendaGroup_WithStatelessKieSession() {
+	@Test
+	public void fireRules_OnStatelessSession_BatchExecution_MinimalConfiguration() {
+		ExecutionResults mockExectionResults = createMock(ExecutionResults.class);
+		expect(mockExectionResults.getValue(RulesExecution.NUMBER_OF_RULES_FIRED)).andReturn(10);
+		mockStatelessKieSession.addEventListener(isA(AgendaEventListener.class));
+		expect(mockStatelessKieSession.execute(isA(BatchExecutionCommand.class))).andReturn(mockExectionResults);
+		replay(mockStatelessKieSession, mockExectionResults);
 		
-		new RulesExecution(mockStatelessKieSession)
+		FiredRulesReturnValues firedRulesReturnValues = new RulesExecution(mockStatelessKieSession)
 			.addFacts("fact1", "fact2")
+			.fireRules();
+		
+		verify(mockStatelessKieSession, mockExectionResults);
+		
+		assertEquals(10, firedRulesReturnValues.getNumberOfRulesFired().intValue());
+	}
+	
+	@Test
+	public void fireRules_OnStatelessSession_BatchExecution_AllConfiguration() {
+		mockStatelessKieSession.addEventListener(mockAgendaEventListener);
+		ExecutionResults mockExectionResults = createMock(ExecutionResults.class);
+		mockStatelessKieSession.addEventListener(isA(AgendaEventListener.class));
+		expect(mockExectionResults.getValue(RulesExecution.NUMBER_OF_RULES_FIRED)).andReturn(10);
+		expect(mockStatelessKieSession.execute(isA(BatchExecutionCommand.class))).andReturn(mockExectionResults);
+		replay(mockStatelessKieSession, mockExectionResults);
+		
+		Map<String, Object> globals = new HashMap<String, Object>();
+		globals.put("g1", "g1");
+		globals.put("g2", "g2");
+		
+		FiredRulesReturnValues firedRulesReturnValues = new RulesExecution(mockStatelessKieSession)
+			.addFacts("fact1", "fact2")
+			.addGlobals(globals)
+			.addEventListeners(mockAgendaEventListener)
 			.forAgendaGroups("group1", "group2")
 			.fireRules();
 		
+		verify(mockStatelessKieSession, mockExectionResults);
+		
+		assertEquals(10, firedRulesReturnValues.getNumberOfRulesFired().intValue());
 	}
 	
 	@Test(expected=IllegalAccessError.class)

@@ -6,112 +6,109 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
 
-import org.easymock.EasyMock;
+import org.anair.drools.provider.session.KieSessionProvider;
 import org.junit.Before;
 import org.junit.Test;
-import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.StatelessKieSession;
 
 public class SessionBuilderTest {
 	
-	private KieContainer mockKieContainer;
+	private KieSessionProvider mockKieSessionProvider;
 	private KieSession mockKieSession;
 	private StatelessKieSession mockStatelessKieSession;
 	private static final String RELEASE_ID = "foo:bar:1.0.0";
-	private SessionBuilder sessionBuilder;
+	private static final String SESSION_NAME = "kbase.session";
+	
 	
 	@Before
 	public void setup(){
-		mockKieContainer = createMock(KieContainer.class);
+		mockKieSessionProvider = createMock(KieSessionProvider.class);
 		mockKieSession = createMock(KieSession.class);
 		mockStatelessKieSession = createMock(StatelessKieSession.class);
-		
-		sessionBuilder = EasyMock.partialMockBuilder(SessionBuilder.class)
-				.withConstructor(String.class).withArgs(RELEASE_ID)
-				.addMockedMethod("registerKieContainer", String.class)
-				.createMock();
-		assertNotNull(sessionBuilder);
-		sessionBuilder.kieContainer = mockKieContainer;
 	}
 	
 	@Test
-	public void fetchDefaultStatelessKieSession() {
-		expect(mockKieContainer.newStatelessKieSession()).andReturn(mockStatelessKieSession);
-		
-		replay(mockStatelessKieSession, mockKieContainer);
-		StatelessKieSession statelessKieSession = sessionBuilder.fetchStatelessKieSession();
-		verify(mockStatelessKieSession, mockKieContainer);
+	public void fetchDefaultStatelessKieSessionWithPollingInterval() {
+		expect(mockKieSessionProvider.getStatelessKieSession(RELEASE_ID, 100, SessionBuilder.DEFAULT_SESSION_NAME)).andReturn(mockStatelessKieSession);
+		replay(mockKieSessionProvider, mockStatelessKieSession);
+		StatelessKieSession statelessKieSession = new SessionBuilder(mockKieSessionProvider)
+			.forKnowledgeModule(RELEASE_ID)
+			.pollingIntervalMillis(100)
+			.fetchStatelessKieSession();
+		verify(mockKieSessionProvider, mockStatelessKieSession);
 		
 		assertNotNull(statelessKieSession);
 	}
 	
 	@Test
 	public void fetchNamedStatelessKieSession() {
-		final String SESSION_NAME = "mysession";
+		expect(mockKieSessionProvider.getStatelessKieSession(RELEASE_ID, 100, SESSION_NAME)).andReturn(mockStatelessKieSession);
 		
-		expect(mockKieContainer.newStatelessKieSession(SESSION_NAME)).andReturn(mockStatelessKieSession);
-		
-		replay(mockKieContainer, mockStatelessKieSession);
-		StatelessKieSession statelessKieSession = sessionBuilder
+		replay(mockKieSessionProvider, mockStatelessKieSession);
+		StatelessKieSession statelessKieSession = new SessionBuilder(mockKieSessionProvider)
+			.forKnowledgeModule(RELEASE_ID)
+			.pollingIntervalMillis(100)
 			.fetchStatelessKieSession(SESSION_NAME);
-		verify(mockKieContainer, mockStatelessKieSession);
+		verify(mockKieSessionProvider, mockStatelessKieSession);
 		
 		assertNotNull(statelessKieSession);
 	}
 	
 	@Test
 	public void fetchNamedStatelessKieSession_NotFound() {
-		final String SESSION_NAME = "mysession";
+		expect(mockKieSessionProvider.getStatelessKieSession(RELEASE_ID, 100, SESSION_NAME)).andReturn(null);
 		
-		expect(mockKieContainer.newStatelessKieSession(SESSION_NAME)).andReturn(null);
-		
-		replay(mockKieContainer, mockStatelessKieSession);
-		StatelessKieSession statelessKieSession = sessionBuilder
+		replay(mockKieSessionProvider);
+		StatelessKieSession statelessKieSession = new SessionBuilder(mockKieSessionProvider)
+			.forKnowledgeModule(RELEASE_ID)
+			.pollingIntervalMillis(100)
 			.fetchStatelessKieSession(SESSION_NAME);
-		verify(mockKieContainer, mockStatelessKieSession);
+		verify(mockKieSessionProvider);
 		
 		assertNull(statelessKieSession);
 	}
 	
 	@Test
 	public void fetchDefaultStatelfulKieSession() {
-		expect(mockKieContainer.newKieSession()).andReturn(mockKieSession);
+		expect(mockKieSessionProvider.getStatefulKieSession(RELEASE_ID, 100, SessionBuilder.DEFAULT_SESSION_NAME)).andReturn(mockKieSession);
 		
-		replay(mockKieContainer, mockKieSession);
-		KieSession statefulKieSession = sessionBuilder
+		replay(mockKieSessionProvider, mockKieSession);
+		KieSession kieSession = new SessionBuilder(mockKieSessionProvider)
+			.forKnowledgeModule(RELEASE_ID)
+			.pollingIntervalMillis(100)
 			.fetchKieSession();
-		verify(mockKieContainer, mockKieSession);
+		verify(mockKieSessionProvider, mockKieSession);
 		
-		assertNotNull(statefulKieSession);
+		assertNotNull(kieSession);
 	}
 	
 	@Test
 	public void fetchNamedStatelfulKieSession() {
-		final String SESSION_NAME = "mysession";
+		expect(mockKieSessionProvider.getStatefulKieSession(RELEASE_ID, 100, SESSION_NAME)).andReturn(mockKieSession);
 		
-		expect(mockKieContainer.newKieSession(SESSION_NAME)).andReturn(mockKieSession);
-		
-		replay(mockKieContainer, mockKieSession);
-		KieSession statefulKieSession = sessionBuilder
+		replay(mockKieSessionProvider, mockKieSession);
+		KieSession kieSession = new SessionBuilder(mockKieSessionProvider)
+			.forKnowledgeModule(RELEASE_ID)
+			.pollingIntervalMillis(100)
 			.fetchKieSession(SESSION_NAME);
-		verify(mockKieContainer, mockKieSession);
+		verify(mockKieSessionProvider, mockKieSession);
 		
-		assertNotNull(statefulKieSession);
+		assertNotNull(kieSession);
 	}
 	
 	@Test
 	public void fetchNamedStatelfulKieSession_NotFound() {
-		final String SESSION_NAME = "mysession";
+		expect(mockKieSessionProvider.getStatefulKieSession(RELEASE_ID, 100, SESSION_NAME)).andReturn(null);
 		
-		expect(mockKieContainer.newKieSession(SESSION_NAME)).andReturn(null);
-		
-		replay(mockKieContainer, mockKieSession);
-		KieSession statefulKieSession = sessionBuilder
+		replay(mockKieSessionProvider);
+		KieSession kieSession = new SessionBuilder(mockKieSessionProvider)
+			.forKnowledgeModule(RELEASE_ID)
+			.pollingIntervalMillis(100)
 			.fetchKieSession(SESSION_NAME);
-		verify(mockKieContainer, mockKieSession);
+		verify(mockKieSessionProvider);
 		
-		assertNull(statefulKieSession);
+		assertNull(kieSession);
 	}
 
 }

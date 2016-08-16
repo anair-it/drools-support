@@ -1,51 +1,57 @@
 package org.anair.drools.fluent.api;
 
-import org.apache.commons.lang3.StringUtils;
-import org.drools.compiler.kproject.ReleaseIdImpl;
-import org.kie.api.KieServices;
+import org.anair.drools.provider.session.KieSessionProvider;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.StatelessKieSession;
 
 
+/**
+ * Helper class to fetch Stateful/Stateless Kie Session based on Knowledge module release Id, session name
+ * 
+ * @author itaxn01
+ *
+ */
 public class SessionBuilder {
-
-	protected KieContainer kieContainer;
 	
-	public SessionBuilder(String groupId, String artifactId, String version) {
-		this.kieContainer = registerKieContainer(groupId+":"+artifactId+":"+version);
+	public static final String DEFAULT_SESSION_NAME = "DEFAULT";
+	protected KieContainer kieContainer;
+	private KieSessionProvider kieSessionProvider;
+	private long pollingIntervalMillis = 0;
+	private String releaseId;
+	
+	public SessionBuilder(KieSessionProvider kieSessionProvider) {
+		this.kieSessionProvider = kieSessionProvider;
+	}
+	
+	public SessionBuilder forKnowledgeModule(String groupId, String artifactId, String version) {
+		return forKnowledgeModule(groupId+":"+artifactId+":"+version);
 	}
 
-	public SessionBuilder(String releaseId) {
-		this.kieContainer = registerKieContainer(releaseId);
+	public SessionBuilder forKnowledgeModule(String releaseId) {
+		this.releaseId = releaseId;
+		return this;
 	}
-
-	public KieContainer registerKieContainer(String releaseId) {
-		KieServices kieServices = KieServices.Factory.get();
-		return kieServices.newKieContainer(new ReleaseIdImpl(releaseId));
+	
+	public SessionBuilder pollingIntervalMillis(long pollingIntervalMillis) {
+		this.pollingIntervalMillis = pollingIntervalMillis;
+		return this;
 	}
 	
 	public KieSession fetchKieSession(String sessionName){
-		if(StringUtils.isBlank(sessionName)){
-			return this.kieContainer.newKieSession();
-		}else{
-			return this.kieContainer.newKieSession(sessionName);
-		}
+		return this.kieSessionProvider.getStatefulKieSession(releaseId, pollingIntervalMillis, sessionName);
 	}
 	
 	public KieSession fetchKieSession(){
-		return fetchKieSession(null);
+		return fetchKieSession(DEFAULT_SESSION_NAME);
 	}
 	
 	public StatelessKieSession fetchStatelessKieSession(String sessionName){
-		if(StringUtils.isBlank(sessionName)){
-			return this.kieContainer.newStatelessKieSession();
-		}else{
-			return this.kieContainer.newStatelessKieSession(sessionName);
-		}
+		return this.kieSessionProvider.getStatelessKieSession(releaseId, pollingIntervalMillis, sessionName);
 	}
 	
 	public StatelessKieSession fetchStatelessKieSession(){
-		return fetchStatelessKieSession(null);
+		return fetchStatelessKieSession(DEFAULT_SESSION_NAME);
 	}
+	
 }

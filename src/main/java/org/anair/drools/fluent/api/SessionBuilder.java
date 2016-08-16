@@ -9,7 +9,7 @@ import org.kie.api.runtime.StatelessKieSession;
 /**
  * Helper class to fetch Stateful/Stateless Kie Session based on Knowledge module release Id, session name
  * 
- * @author itaxn01
+ * @author anair
  *
  */
 public class SessionBuilder {

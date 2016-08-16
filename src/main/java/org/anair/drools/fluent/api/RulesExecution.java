@@ -30,7 +30,7 @@ import org.slf4j.MDC;
 /**
  * Helper class to prepare objects for rules execution and to fire rules.
  * 
- * @author itaxn01
+ * @author anair
  *
  */
 public class RulesExecution {

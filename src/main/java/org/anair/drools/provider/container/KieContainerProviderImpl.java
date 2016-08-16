@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 public class KieContainerProviderImpl implements KieContainerProvider {
 	private static Logger LOG = LoggerFactory.getLogger(KieContainerProviderImpl.class);
 	private final Map<ReleaseId, KieContainer> kieContainerCache = new ConcurrentHashMap<ReleaseId, KieContainer>();
-	private KieServices kieServices = KieServices.Factory.get();
+	private KieServices kieServices;
 	
 	@Override
 	public KieContainer getKieContainer(String releaseId, long pollingIntervalMillis) {

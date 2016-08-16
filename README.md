@@ -135,6 +135,6 @@ This IT specific feature generates a drools audit log with the rules that got ex
 	- Rules that got fired along with performance stat is printed in the console
 	
 # Reference
-[Drools 6.4.0.Final reference](https://docs.jboss.org/drools/release/6.4.0.Final/drools-docs/html_single/#d0e1087)
-[Drools 6.4.0.Final Jira](https://docs.jboss.org/drools/release/6.4.0.Final/drools-docs/html_single/#d0e1087)
+- [Drools 6.4.0.Final reference](https://docs.jboss.org/drools/release/6.4.0.Final/drools-docs/html_single/#d0e1087)
+- [Drools 6.4.0.Final Jira](https://docs.jboss.org/drools/release/6.4.0.Final/drools-docs/html_single/#d0e1087)
 	

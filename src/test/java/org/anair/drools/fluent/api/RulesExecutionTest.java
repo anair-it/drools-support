@@ -52,7 +52,6 @@ public class RulesExecutionTest {
 	@Test
 	public void fireRules_OnStatelessSession_MinimalConfiguration() {
 		RulesExecution rulesExecution = new RulesExecution(mockStatelessKieSession);
-		rulesExecution.setTraceFileName("dummyfile");
 		
 		mockStatelessKieSession.addEventListener(isA(AgendaEventListener.class));
 		mockStatelessKieSession.execute(Arrays.asList("fact1", "fact2"));

@@ -3,9 +3,9 @@
 - Custom Spring TestExecutionListener to support unit tests
 
 # Version
-- JDK: >6
+- JDK: >= 6
 - Maven: 3.x
-- Spring: > 3.2
+- Spring: >= 3.2
 - Drools: 6.4.0.Final
 
 ## Getting started
@@ -136,5 +136,5 @@ This IT specific feature generates a drools audit log with the rules that got ex
 	
 # Reference
 - [Drools 6.4.0.Final reference](https://docs.jboss.org/drools/release/6.4.0.Final/drools-docs/html_single/#d0e1087)
-- [Drools 6.4.0.Final Jira](https://docs.jboss.org/drools/release/6.4.0.Final/drools-docs/html_single/#d0e1087)
+- [Drools 6.4.0.Final Jira](https://issues.jboss.org/projects/DROOLS/versions/12329990)
 	

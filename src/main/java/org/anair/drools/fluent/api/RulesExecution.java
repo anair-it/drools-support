@@ -51,7 +51,6 @@ public class RulesExecution {
 	private boolean enableListeners = true;
 	private KieRuntimeLogger logger = null;
 	private Map<String, String> appContext = new HashMap<String, String>();
-	private String traceFileName;
 	
 	public RulesExecution(KieSession kieSession){
 		this.kieSession = kieSession;
@@ -65,7 +64,7 @@ public class RulesExecution {
 	
 	public RulesExecution auditTrace(String auditFilePath){
 		if(LOG.isTraceEnabled()){
-			auditFilePath += StringUtils.defaultIfEmpty(traceFileName, DEFAULT_RULES_TRACE_FILENAME);
+			auditFilePath += DEFAULT_RULES_TRACE_FILENAME;
 			
 			if(this.kieSession != null){
 				this.logger = getKieServices().getLoggers().newFileLogger(this.kieSession, auditFilePath);	
@@ -205,10 +204,6 @@ public class RulesExecution {
 		return firedRulesReturnValues;
 	}
 	
-	public void setTraceFileName(String traceFileName){
-		
-	}
-
 	private FiredRulesReturnValues fireKieSessionRules() {
 		LOG.trace("Preparing to fire rules on a Stateful Kie Session...");
 		

@@ -3,9 +3,9 @@
 - Custom Spring TestExecutionListener to support unit tests
 
 # Version
-- JDK: >= 6
+- JDK 8
 - Maven: 3.x
-- Spring: >= 3.2
+- Spring: 4.3.x
 - Drools: 6.4.0.Final
 
 ## Getting started

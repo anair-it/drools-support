@@ -14,10 +14,10 @@ import org.kie.api.runtime.StatelessKieSession;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-
+@Ignore //This is not a runnable test. Just a sample
 @RunWith(SpringJUnit4ClassRunner.class)
 @TestExecutionListeners({DroolsTestExecutionListener.class})
-@KReleaseId(groupId="foo.bar", artifactId="bar-knowledge", version="1.0.0")
+@KReleaseId(groupId="foo.bar", artifactId="bar-knowledge", version="RELEASE")
 public class SimpleTest {
 	@StatelessKSession("bar.kbase.stateless.session")
 	private StatelessKieSession statelessKieSession;
@@ -25,7 +25,6 @@ public class SimpleTest {
 	@KSession("bar.kbase.stateful.session")
 	private KieSession statefulKieSession;
 	
-	@Ignore //This is not a runnable test. Just a sample
 	@Test
 	public void statelessSession_test_sample(){
 		new RulesExecution(statelessKieSession)

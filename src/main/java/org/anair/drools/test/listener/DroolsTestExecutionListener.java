@@ -99,7 +99,7 @@ public class DroolsTestExecutionListener extends DependencyInjectionTestExecutio
 			}else{
 				kieBase = this.kieContainer.getKieBase(kBaseAnn.value().trim());
 			}
-			Assert.notNull(kieBase);
+			Assert.notNull(kieBase, "KieBase must be present");
 			registerSpringBean(testContext.getApplicationContext(), kBaseAnn.value().trim(), kieBase);
 		}
 	}
@@ -153,11 +153,11 @@ public class DroolsTestExecutionListener extends DependencyInjectionTestExecutio
 	}
 	
 	private String[] extractReleaseId(TestContext testContext) {
-		Assert.isTrue(testContext.getTestClass().isAnnotationPresent(KReleaseId.class));
+		Assert.isTrue(testContext.getTestClass().isAnnotationPresent(KReleaseId.class), "KReleaseId Annotation must be present");
 		KReleaseId kReleaseId = testContext.getTestClass().getAnnotation(KReleaseId.class);
-		Assert.notNull(kReleaseId.groupId());
-		Assert.notNull(kReleaseId.artifactId());
-		Assert.notNull(kReleaseId.version());
+		Assert.notNull(kReleaseId.groupId(), "Group id must be present");
+		Assert.notNull(kReleaseId.artifactId(), "Artifact id must be present");
+		Assert.notNull(kReleaseId.version(), "Version must be present");
 		return new String[]{kReleaseId.groupId(), kReleaseId.artifactId(), kReleaseId.version()};
 	}
 	
@@ -224,7 +224,7 @@ public class DroolsTestExecutionListener extends DependencyInjectionTestExecutio
 		@Override
 	    public void afterMatchFired(AfterMatchFiredEvent event) {
 			sw.stop();
-			LOG.info("Rule -> {} | Stats -> {}ms", event.getMatch().getRule().getName(), TimeUnit.NANOSECONDS.toMillis(sw.getNanoTime()));
+			LOG.info("{} | {}ms", event.getMatch().getRule().getName(), TimeUnit.NANOSECONDS.toMillis(sw.getNanoTime()));
 	    }
 
 		@Override

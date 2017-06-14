@@ -2,6 +2,7 @@ package org.anair.drools.provider.container;
 
 import static org.junit.Assert.*;
 
+import org.anair.rules.exception.RulesSupportRuntimeException;
 import org.drools.compiler.kie.builder.impl.ResultsImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,7 +59,7 @@ public class KieContainerProviderImplTest {
 		assertNotNull(actualKieContainer);
 	}
 	
-	@Test(expected=RuntimeException.class)
+	@Test(expected=RulesSupportRuntimeException.class)
 	public void getKieContainer_New_NoPolling_ValidationError() {
 		expect(mockKieServices.newKieContainer(isA(ReleaseId.class))).andReturn(mockKieContainer);
 		

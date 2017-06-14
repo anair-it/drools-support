@@ -2,23 +2,22 @@ package org.anair.drools.test.listener;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.anair.drools.test.annotation.EventListeners;
 import org.anair.drools.test.annotation.StatelessKSession;
+import org.anair.rules.exception.RulesSupportRuntimeException;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.StopWatch;
-import org.drools.core.event.DefaultAgendaEventListener;
 import org.kie.api.KieBase;
 import org.kie.api.KieServices;
+import org.kie.api.builder.KieScanner;
 import org.kie.api.builder.Message;
 import org.kie.api.builder.Message.Level;
 import org.kie.api.builder.Results;
 import org.kie.api.cdi.KBase;
 import org.kie.api.cdi.KReleaseId;
 import org.kie.api.cdi.KSession;
-import org.kie.api.event.rule.AfterMatchFiredEvent;
-import org.kie.api.event.rule.BeforeMatchFiredEvent;
 import org.kie.api.logger.KieRuntimeLogger;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
@@ -34,6 +33,7 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.util.Assert;
 
 
+
 public class DroolsTestExecutionListener extends DependencyInjectionTestExecutionListener {
 	private static Logger LOG = LoggerFactory.getLogger(DroolsTestExecutionListener.class);
 	private KieContainer kieContainer;
@@ -45,17 +45,24 @@ public class DroolsTestExecutionListener extends DependencyInjectionTestExecutio
 		String[] releaseId = extractReleaseId(testContext);
 		this.kieServices = KieServices.Factory.get();
 		this.kieContainer = kieServices.newKieContainer(kieServices.newReleaseId(releaseId[0], releaseId[1], releaseId[2]));
+		
+		KieScanner kieScanner = kieServices.newKieScanner(kieContainer);
+		kieScanner.scanNow();
+		
 		validateKieContainer(this.kieContainer.verify());
 		
-		Field[] declaredFields = testContext.getTestClass().getDeclaredFields();
+		Field[] declaredFieldsParent = testContext.getTestClass().getSuperclass().getDeclaredFields();
+		Field[] declaredFieldsTestClass = testContext.getTestClass().getDeclaredFields();
+		Field[] declaredFields = ArrayUtils.addAll(declaredFieldsParent, declaredFieldsTestClass);
+		
 		for(Field declaredField: declaredFields){
 			Annotation[] fieldAnns = declaredField.getAnnotations();
 			for(Annotation fieldAnn:fieldAnns){
-				if(fieldAnn.annotationType().getName().equals(KBase.class.getName())){
+				if(fieldAnn instanceof KBase){
 					registerKieBase(testContext, (KBase) fieldAnn);
-				}else if(fieldAnn.annotationType().getName().equals(KSession.class.getName())){
+				}else if(fieldAnn instanceof KSession){
 					registerStatefulKieSession(testContext, (KSession)fieldAnn);
-				}else if(fieldAnn.annotationType().getName().equals(StatelessKSession.class.getName())){
+				}else if(fieldAnn instanceof StatelessKSession){
 					registerStatelessKieSession(testContext, (StatelessKSession)fieldAnn);
 				}
 			}
@@ -64,13 +71,10 @@ public class DroolsTestExecutionListener extends DependencyInjectionTestExecutio
 
 	public void validateKieContainer(Results results) {
 		if(results.hasMessages(Level.ERROR)){
-			StringBuilder errorMessageConcat = new StringBuilder();
-			for(Message message: results.getMessages(Level.ERROR)){
-				errorMessageConcat.append(message.toString());
-				errorMessageConcat.append(" : ");
-			}
-			errorMessageConcat.deleteCharAt(errorMessageConcat.length()-1);
-			throw new RuntimeException(errorMessageConcat.toString());
+			String errorMessageConcat = results.getMessages(Level.ERROR).stream()
+				.map(Message::toString)
+				.collect(Collectors.joining(" : "));
+			throw new RulesSupportRuntimeException(errorMessageConcat);
 		}
 	}
 
@@ -148,13 +152,18 @@ public class DroolsTestExecutionListener extends DependencyInjectionTestExecutio
 			if(StringUtils.isNotBlank(eventListeners.auditlogFileName())){
 				logger = kieServices.getLoggers().newFileLogger(session instanceof KieSession?(KieSession)session:(StatelessKieSession)session, "target/"+eventListeners.auditlogFileName());
 			}
-			registerEventListener(session);
 		}
 	}
 	
 	private String[] extractReleaseId(TestContext testContext) {
-		Assert.isTrue(testContext.getTestClass().isAnnotationPresent(KReleaseId.class), "KReleaseId Annotation must be present");
-		KReleaseId kReleaseId = testContext.getTestClass().getAnnotation(KReleaseId.class);
+		KReleaseId kReleaseId;
+		if(testContext.getTestClass().isAnnotationPresent(KReleaseId.class)){
+			kReleaseId = testContext.getTestClass().getAnnotation(KReleaseId.class);
+			
+		}else {
+			Assert.isTrue(testContext.getTestClass().getSuperclass().isAnnotationPresent(KReleaseId.class), "KReleaseId annotation is a must");
+			kReleaseId = testContext.getTestClass().getSuperclass().getAnnotation(KReleaseId.class);
+		}
 		Assert.notNull(kReleaseId.groupId(), "Group id must be present");
 		Assert.notNull(kReleaseId.artifactId(), "Artifact id must be present");
 		Assert.notNull(kReleaseId.version(), "Version must be present");
@@ -209,28 +218,4 @@ public class DroolsTestExecutionListener extends DependencyInjectionTestExecutio
 		return this.kieContainer.newKieSession(kieSessionName);
 	}
 	
-	private void registerEventListener(Object session){
-		if (session instanceof KieSession){
-			((KieSession) session).addEventListener(new UnitTestAgendaListener());
-		}else{
-			((StatelessKieSession) session).addEventListener(new UnitTestAgendaListener());
-		}
-	}
-	
-	private class UnitTestAgendaListener extends DefaultAgendaEventListener {
-		private Logger LOG = LoggerFactory.getLogger(UnitTestAgendaListener.class);
-		private StopWatch sw;
-		
-		@Override
-	    public void afterMatchFired(AfterMatchFiredEvent event) {
-			sw.stop();
-			LOG.info("{} | {}ms", event.getMatch().getRule().getName(), TimeUnit.NANOSECONDS.toMillis(sw.getNanoTime()));
-	    }
-
-		@Override
-		public void beforeMatchFired(BeforeMatchFiredEvent event) {
-			sw = new StopWatch();
-			sw.start();
-		}
-	}
 }

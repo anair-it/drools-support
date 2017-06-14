@@ -11,7 +11,7 @@ public class FiredRulesReturnValues {
 	private List<FactHandle> factHandles = new ArrayList<FactHandle>();
 	private Integer numberOfRulesFired;
 	private ExecutionResults executionResults;
-	
+	private List<String> executedRules;
 	
 	
 	public ExecutionResults getExecutionResults() {
@@ -35,6 +35,12 @@ public class FiredRulesReturnValues {
 	
 	public void addFactHandle(FactHandle factHandle){
 		this.factHandles.add(factHandle);
+	}
+	public List<String> getExecutedRules() {
+		return executedRules;
+	}
+	public void setExecutedRules(List<String> executedRules) {
+		this.executedRules = executedRules;
 	}
 	
 }

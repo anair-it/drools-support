@@ -6,7 +6,7 @@
 - JDK 8
 - Maven: 3.x
 - Spring: 4.3.x
-- Drools: 6.4.0.Final
+- Drools: 6.5.0.Final
 
 ## Getting started
 - Download this project

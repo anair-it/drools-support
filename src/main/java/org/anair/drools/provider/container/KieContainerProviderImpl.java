@@ -2,7 +2,9 @@ package org.anair.drools.provider.container;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
+import org.anair.rules.exception.RulesSupportRuntimeException;
 import org.drools.compiler.kproject.ReleaseIdImpl;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieScanner;
@@ -13,6 +15,7 @@ import org.kie.api.builder.Message.Level;
 import org.kie.api.runtime.KieContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 public class KieContainerProviderImpl implements KieContainerProvider {
 	private static Logger LOG = LoggerFactory.getLogger(KieContainerProviderImpl.class);
@@ -55,14 +58,11 @@ public class KieContainerProviderImpl implements KieContainerProvider {
 		LOG.debug("Validating Kie Container");
 		Results results = kieContainer.verify();
 		if(results.hasMessages(Level.ERROR)){
-			StringBuilder errorMessageConcat = new StringBuilder();
-			for(Message message: results.getMessages(Level.ERROR)){
-				errorMessageConcat.append(message.toString());
-				errorMessageConcat.append(" : ");
-			}
-			errorMessageConcat.deleteCharAt(errorMessageConcat.length()-1);
-			LOG.error("Found ERRORs while validating Kie Container: {}", errorMessageConcat.toString());
-			throw new RuntimeException(errorMessageConcat.toString());
+			String errorMessageConcat = results.getMessages(Level.ERROR).stream()
+					.map(Message::toString)
+					.collect(Collectors.joining(":"));
+			LOG.error("Found ERRORs while validating Kie Container: {}", errorMessageConcat);
+			throw new RulesSupportRuntimeException(errorMessageConcat);
 		}else{
 			LOG.debug("No ERRORs found while Validating Kie Container");
 		}

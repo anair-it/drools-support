@@ -11,7 +11,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.kie.api.KieBase;
 import org.kie.api.KieServices;
-import org.kie.api.builder.KieScanner;
 import org.kie.api.builder.Message;
 import org.kie.api.builder.Message.Level;
 import org.kie.api.builder.Results;
@@ -45,9 +44,6 @@ public class DroolsTestExecutionListener extends DependencyInjectionTestExecutio
 		String[] releaseId = extractReleaseId(testContext);
 		this.kieServices = KieServices.Factory.get();
 		this.kieContainer = kieServices.newKieContainer(kieServices.newReleaseId(releaseId[0], releaseId[1], releaseId[2]));
-		
-		KieScanner kieScanner = kieServices.newKieScanner(kieContainer);
-		kieScanner.scanNow();
 		
 		validateKieContainer(this.kieContainer.verify());
 		

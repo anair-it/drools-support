@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.anair.drools.model.FiredRulesReturnValues;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.drools.core.management.GenericKieSessionMonitoringImpl.AgendaStats;
@@ -28,7 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 /**
- * Helper class to prepare objects for rules execution and to fire rules.
+ * Builder class to prepare objects for rules execution and to fire rules.
  * 
  * @author anair
  *
@@ -42,7 +45,7 @@ public class RulesExecution {
 	private static Logger RULES_LOG = LoggerFactory.getLogger(RULES_LOGGER_NAME);
 		
 	private Collection<Object> facts;
-	private Map<String, Object> globals = new HashMap<String, Object>();
+	private Map<String, Object> globals = new HashMap<>();
 	private String[] agendaGroupNames;
 	private Collection<EventListener> eventListeners;
 	private KieSession kieSession;
@@ -50,26 +53,28 @@ public class RulesExecution {
 	private AgendaStats agendaStats = new AgendaStats();
 	private boolean enableListeners = true;
 	private KieRuntimeLogger logger = null;
-	private Map<String, String> appContext = new HashMap<String, String>();
+	private Map<String, String> appContext = new HashMap<>();
+	private FiredRulesReturnValues firedRulesReturnValues;
 	
 	public RulesExecution(KieSession kieSession){
+		this();
 		this.kieSession = kieSession;
-		if(RULES_LOG.isDebugEnabled()){
-			agendaStats = new AgendaStats();
-			agendaStats.reset();
-			registerDefaultEventListeners(agendaStats);
-		}
 	}
 	
 	public RulesExecution(StatelessKieSession statelessKieSession){
+		this();
 		this.statelessKieSession = statelessKieSession;
-		if(RULES_LOG.isDebugEnabled()){
+	}
+
+	private RulesExecution(){
+		this.firedRulesReturnValues = new FiredRulesReturnValues();
+		if(RULES_LOG.isInfoEnabled()){
 			agendaStats = new AgendaStats();
 			agendaStats.reset();
 			registerDefaultEventListeners(agendaStats);
 		}
 	}
-	
+
 	public RulesExecution auditTrace(String auditFilePath){
 		if(LOG.isTraceEnabled()){
 			auditFilePath += DEFAULT_RULES_TRACE_FILENAME;
@@ -98,7 +103,7 @@ public class RulesExecution {
 				}
 			}else{
 				if(this.facts == null){
-					this.facts = new ArrayList<Object>(); 
+					this.facts = new ArrayList<>(); 
 				}
 				this.facts.add(fact);
 			}
@@ -123,7 +128,7 @@ public class RulesExecution {
 	
 	public RulesExecution addEventListeners(EventListener... eventListeners){
 		if(this.eventListeners == null){
-			this.eventListeners = new ArrayList<EventListener>();
+			this.eventListeners = new ArrayList<>();
 		}
 		this.eventListeners.addAll(Arrays.asList(eventListeners));
 		return this;
@@ -154,38 +159,36 @@ public class RulesExecution {
 	}
 	
 	public FiredRulesReturnValues fireRules(){
-		FiredRulesReturnValues firedRulesReturnValues = null;
 		try{
 			if(RULES_LOG.isInfoEnabled()){
 				auditLoggingContext();
 			}
-			firedRulesReturnValues = fireRules(true);
+			fireRules(true);
 		}finally{
-			fireRulesPostProcessor(firedRulesReturnValues);
+			fireRulesPostProcessor();
 		}
 		
 		return firedRulesReturnValues;
 	}
 
-	private void fireRulesPostProcessor(FiredRulesReturnValues firedRulesReturnValues) {
-		printDefaultAgendaStats(firedRulesReturnValues);
+	private void fireRulesPostProcessor() {
+		printDefaultAgendaStats();
 		if(this.logger != null){
 			this.logger.close();
 		}
-		if(RULES_LOG.isInfoEnabled() && this.appContext != null && ! appContext.isEmpty()){
+		if(RULES_LOG.isInfoEnabled() && MapUtils.isNotEmpty(this.appContext)){
 			appContext.forEach((key,value) -> MDC.remove(key));
 		}
 	}
 
 	private void auditLoggingContext() {
-		if(appContext != null && ! appContext.isEmpty()){
+		if(MapUtils.isNotEmpty(this.appContext)){
 			appContext.forEach((key,value) -> MDC.put(key, StringUtils.defaultIfBlank(value, StringUtils.SPACE)));
 		}
 	}
 	
 	public FiredRulesReturnValues fireRules(boolean enableBatchExecution){
-		FiredRulesReturnValues firedRulesReturnValues = new FiredRulesReturnValues();
-		if(this.facts ==  null || this.facts.isEmpty()){
+		if(CollectionUtils.isEmpty(facts)){
 			throw new IllegalAccessError("Cannot fire rules without facts. Set atleast 1 fact");
 		}
 		
@@ -194,22 +197,19 @@ public class RulesExecution {
 		}
 		
 		if(this.kieSession != null){
-			firedRulesReturnValues = fireKieSessionRules();
+			fireKieSessionRules();
 		}else if(this.statelessKieSession != null){
 			if(enableBatchExecution){
-				firedRulesReturnValues = fireStatelessKieSessionRulesBatchExecution();	
+				fireStatelessKieSessionRulesBatchExecution();	
 			}else{
 				fireStatelessKieSessionRules();
 			}
 		}
-		
 		return firedRulesReturnValues;
 	}
 	
-	private FiredRulesReturnValues fireKieSessionRules() {
+	private void fireKieSessionRules() {
 		LOG.trace("Preparing to fire rules on a Stateful Kie Session...");
-		
-		FiredRulesReturnValues firedRulesReturnValues = new FiredRulesReturnValues();
 		
 		this.globals.forEach((k,v)->this.kieSession.setGlobal(k, v));
 
@@ -230,7 +230,7 @@ public class RulesExecution {
 			}
 		}
 		
-		if(agendaGroupNames != null && agendaGroupNames.length > 0){
+		if(ArrayUtils.isNotEmpty(agendaGroupNames)){
 			for(int i=agendaGroupNames.length;i>0;i--){
 				this.kieSession.getAgenda().getAgendaGroup(agendaGroupNames[i-1]).setFocus();
 			}
@@ -246,8 +246,6 @@ public class RulesExecution {
 			LOG.debug("Fired {} rules on a Stateful Kie Session. Execution time: {}", numberOfRulesFired, sw.toString());
 		}
 		firedRulesReturnValues.setNumberOfRulesFired(numberOfRulesFired);
-		
-		return firedRulesReturnValues;
 	}
 	
 	private void fireStatelessKieSessionRules(){
@@ -278,21 +276,18 @@ public class RulesExecution {
 		}
 	}
 	
-	private FiredRulesReturnValues fireStatelessKieSessionRulesBatchExecution(){
+	private void fireStatelessKieSessionRulesBatchExecution(){
 		LOG.trace("Preparing to fire rules on a Stateless Kie Session - batch command mode...");
 		
-		FiredRulesReturnValues firedRulesReturnValues = new FiredRulesReturnValues();
 		KieServices kieServices = getKieServices();
 		@SuppressWarnings("rawtypes")
 		List<Command> commands = new ArrayList<Command>();
 		
-		for(Map.Entry<String, Object> entry: this.globals.entrySet()){
-			commands.add(kieServices.getCommands().newSetGlobal(entry.getKey(), entry.getValue(), true));
-		}
+		this.globals.forEach((k,v)->commands.add(kieServices.getCommands().newSetGlobal(k, v, true)));
 		
-		for(Object fact: this.facts){
+		this.facts.forEach(fact->{
 			commands.add(kieServices.getCommands().newInsert(fact));
-		}
+		});
 		
 		if(this.eventListeners != null){
 			for(EventListener eventListener: this.eventListeners){
@@ -306,7 +301,7 @@ public class RulesExecution {
 			}
 		}
 		
-		if(agendaGroupNames != null && agendaGroupNames.length > 0){
+		if(ArrayUtils.isNotEmpty(agendaGroupNames)){
 			for(int i=agendaGroupNames.length;i>0;i--){
 				kieServices.getCommands().newAgendaGroupSetFocus(agendaGroupNames[i-1]);
 			}
@@ -327,17 +322,15 @@ public class RulesExecution {
 			sw.stop();
 			LOG.debug("Fired {} rules on a Stateless Kie Session in batch mode. Execution time: {}", firedRulesReturnValues.getNumberOfRulesFired(), sw.toString());
 		}
-		
-		return firedRulesReturnValues;
 	}
 	
 	private void registerDefaultEventListeners(EventListener... eventListeners){
 		this.addEventListeners(eventListeners);
 	}
 	
-	private void printDefaultAgendaStats(FiredRulesReturnValues firedRulesReturnValues){
+	private void printDefaultAgendaStats(){
 		if(RULES_LOG.isInfoEnabled()){
-			for(Map.Entry<String, AgendaStatsData> entry:this.agendaStats.getRulesStats().entrySet()){
+			for(Map.Entry<String, AgendaStatsData> entry: this.agendaStats.getRulesStats().entrySet()){
 				RULES_LOG.info("{} | {}", entry.getKey(), entry.getValue());
 				firedRulesReturnValues.getExecutedRules().add(entry.getKey());
 			}

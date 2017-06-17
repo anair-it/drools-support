@@ -8,10 +8,10 @@ import org.kie.api.runtime.rule.FactHandle;
 
 public class FiredRulesReturnValues {
 	
-	private List<FactHandle> factHandles = new ArrayList<FactHandle>();
+	private List<FactHandle> factHandles = new ArrayList<>();
 	private Integer numberOfRulesFired;
 	private ExecutionResults executionResults;
-	private List<String> executedRules;
+	private List<String> executedRules = new ArrayList<>();
 	
 	
 	public ExecutionResults getExecutionResults() {

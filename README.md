@@ -136,4 +136,5 @@ This IT specific feature generates a drools audit log with the rules that got ex
 	
 # Reference
 - [Drools 6.5.0.Final reference](https://docs.jboss.org/drools/release/6.5.0.Final/drools-docs/html_single/#d0e1087)
+- [Drools testing using Cucumber](https://github.com/anair-it/drools-cucumber)
 	

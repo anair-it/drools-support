@@ -24,7 +24,7 @@
 		StatelessKieSession statelessKieSession = new SessionBuilder(kieSessionProvider)
 			.forKnowledgeModule("foo.bar:bar-knowledge:1.0.0")
 			.pollingIntervalMillis(100) //Optional
-			.sessionPoolSize(5) //Optiona. Defaulted to pool size of 10
+			.sessionPoolSize(5) //Optional. Defaulted to pool size of 10
 			.fetchStatelessKieSession("bar.kbase.stateless.session");  //No-arg method will fetch default session
 			
 ### Get a stateful Kie session:

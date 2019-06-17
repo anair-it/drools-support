@@ -12,6 +12,6 @@ import org.kie.api.runtime.StatelessKieSession;
  */
 public interface KieSessionProvider {
 
-	KieSession getStatefulKieSession(String releaseId, long pollingIntervalMillis, String sessionName);
-	StatelessKieSession getStatelessKieSession(String releaseId, long pollingIntervalMillis, String sessionName);
+	KieSession getStatefulKieSession(String releaseId, long pollingIntervalMillis, String sessionName, int sessionPoolSize);
+	StatelessKieSession getStatelessKieSession(String releaseId, long pollingIntervalMillis, String sessionName, int sessionPoolSize);
 }

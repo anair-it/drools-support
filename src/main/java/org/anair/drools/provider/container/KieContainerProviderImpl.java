@@ -18,8 +18,8 @@ import org.slf4j.LoggerFactory;
 
 
 public class KieContainerProviderImpl implements KieContainerProvider {
-	private static Logger LOG = LoggerFactory.getLogger(KieContainerProviderImpl.class);
-	private final Map<ReleaseId, KieContainer> kieContainerCache = new ConcurrentHashMap<ReleaseId, KieContainer>();
+	private static final Logger LOG = LoggerFactory.getLogger(KieContainerProviderImpl.class);
+	private final Map<ReleaseId, KieContainer> kieContainerCache = new ConcurrentHashMap<>();
 	private KieServices kieServices;
 	
 	@Override
@@ -33,7 +33,7 @@ public class KieContainerProviderImpl implements KieContainerProvider {
 			LOG.debug("Kie Container not found in cache. Acquiring...");
 			KieContainer kieContainer = this.createKieContainer(releaseIdObj);
 			if(kieContainer == null){
-				throw new RuntimeException("Kie Container not found for knowledge module: {}");
+				throw new RulesSupportRuntimeException("Kie Container not found for knowledge module: {}");
 			}
 			LOG.debug("Acquired Kie Container");
 			validateKieContainer(kieContainer);

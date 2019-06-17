@@ -41,8 +41,8 @@ public class RulesExecution {
 	protected static final String NUMBER_OF_RULES_FIRED = "numberOfRulesFired";
 	private static final String RULES_LOGGER_NAME = "rules-audit";
 
-	private static Logger LOG = LoggerFactory.getLogger(RulesExecution.class);
-	private static Logger RULES_LOG = LoggerFactory.getLogger(RULES_LOGGER_NAME);
+	private static final Logger LOG = LoggerFactory.getLogger(RulesExecution.class);
+	private static final Logger RULES_LOG = LoggerFactory.getLogger(RULES_LOGGER_NAME);
 		
 	private Collection<Object> facts;
 	private Map<String, Object> globals = new HashMap<>();
@@ -243,7 +243,7 @@ public class RulesExecution {
 		int numberOfRulesFired = this.kieSession.fireAllRules();
 		if(LOG.isDebugEnabled()){
 			sw.stop();
-			LOG.debug("Fired {} rules on a Stateful Kie Session. Execution time: {}", numberOfRulesFired, sw.toString());
+			LOG.debug("Fired {} rules on a Stateful Kie Session. Execution time: {}", numberOfRulesFired, sw);
 		}
 		firedRulesReturnValues.setNumberOfRulesFired(numberOfRulesFired);
 	}
@@ -272,7 +272,7 @@ public class RulesExecution {
 		this.statelessKieSession.execute(facts);
 		if(LOG.isDebugEnabled()){
 			sw.stop();
-			LOG.debug("Fired rules on a Stateless Kie Session. Execution time: {}", sw.toString());
+			LOG.debug("Fired rules on a Stateless Kie Session. Execution time: {}", sw);
 		}
 	}
 	
@@ -320,7 +320,7 @@ public class RulesExecution {
 		
 		if(LOG.isDebugEnabled()){
 			sw.stop();
-			LOG.debug("Fired {} rules on a Stateless Kie Session in batch mode. Execution time: {}", firedRulesReturnValues.getNumberOfRulesFired(), sw.toString());
+			LOG.debug("Fired {} rules on a Stateless Kie Session in batch mode. Execution time: {}", firedRulesReturnValues.getNumberOfRulesFired(), sw);
 		}
 	}
 	

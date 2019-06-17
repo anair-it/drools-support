@@ -38,7 +38,7 @@ public class RulesExecutionTest {
 	
 	
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		mockKieSession = createMock(KieSession.class);
 		mockStatelessKieSession = createMock(StatelessKieSession.class);
 		mockFactHandle = createMock(FactHandle.class);
@@ -78,7 +78,7 @@ public class RulesExecutionTest {
 	
 		replay(mockStatelessKieSession, mockAgendaEventListener);
 		
-		List<Object> factList = new ArrayList<Object>();
+		List<Object> factList = new ArrayList<>();
 		factList.add("fact1");
 		factList.add("fact2");
 		FiredRulesReturnValues firedRulesReturnValues = new RulesExecution(mockStatelessKieSession)

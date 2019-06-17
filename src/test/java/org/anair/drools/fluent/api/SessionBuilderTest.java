@@ -30,11 +30,12 @@ public class SessionBuilderTest {
 	
 	@Test
 	public void fetchDefaultStatelessKieSessionWithPollingInterval() {
-		expect(mockKieSessionProvider.getStatelessKieSession(RELEASE_ID, 100, SessionBuilder.DEFAULT_SESSION_NAME)).andReturn(mockStatelessKieSession);
+		expect(mockKieSessionProvider.getStatelessKieSession(RELEASE_ID, 100, SessionBuilder.DEFAULT_SESSION_NAME, 10)).andReturn(mockStatelessKieSession);
 		replay(mockKieSessionProvider, mockStatelessKieSession);
 		StatelessKieSession statelessKieSession = new SessionBuilder(mockKieSessionProvider)
 			.forKnowledgeModule(RELEASE_ID)
 			.pollingIntervalMillis(100)
+				.sessionPoolSize(10)
 			.fetchStatelessKieSession();
 		verify(mockKieSessionProvider, mockStatelessKieSession);
 		
@@ -43,7 +44,7 @@ public class SessionBuilderTest {
 	
 	@Test
 	public void fetchNamedStatelessKieSession() {
-		expect(mockKieSessionProvider.getStatelessKieSession(RELEASE_ID, 100, SESSION_NAME)).andReturn(mockStatelessKieSession);
+		expect(mockKieSessionProvider.getStatelessKieSession(RELEASE_ID, 100, SESSION_NAME, 10)).andReturn(mockStatelessKieSession);
 		
 		replay(mockKieSessionProvider, mockStatelessKieSession);
 		StatelessKieSession statelessKieSession = new SessionBuilder(mockKieSessionProvider)
@@ -57,12 +58,13 @@ public class SessionBuilderTest {
 	
 	@Test
 	public void fetchNamedStatelessKieSession_NotFound() {
-		expect(mockKieSessionProvider.getStatelessKieSession(RELEASE_ID, 100, SESSION_NAME)).andReturn(null);
+		expect(mockKieSessionProvider.getStatelessKieSession(RELEASE_ID, 100, SESSION_NAME, 20)).andReturn(null);
 		
 		replay(mockKieSessionProvider);
 		StatelessKieSession statelessKieSession = new SessionBuilder(mockKieSessionProvider)
 			.forKnowledgeModule(RELEASE_ID)
 			.pollingIntervalMillis(100)
+				.sessionPoolSize(20)
 			.fetchStatelessKieSession(SESSION_NAME);
 		verify(mockKieSessionProvider);
 		
@@ -71,7 +73,7 @@ public class SessionBuilderTest {
 	
 	@Test
 	public void fetchDefaultStatelfulKieSession() {
-		expect(mockKieSessionProvider.getStatefulKieSession(RELEASE_ID, 100, SessionBuilder.DEFAULT_SESSION_NAME)).andReturn(mockKieSession);
+		expect(mockKieSessionProvider.getStatefulKieSession(RELEASE_ID, 100, SessionBuilder.DEFAULT_SESSION_NAME, 10)).andReturn(mockKieSession);
 		
 		replay(mockKieSessionProvider, mockKieSession);
 		KieSession kieSession = new SessionBuilder(mockKieSessionProvider)
@@ -85,7 +87,7 @@ public class SessionBuilderTest {
 	
 	@Test
 	public void fetchNamedStatelfulKieSession() {
-		expect(mockKieSessionProvider.getStatefulKieSession(RELEASE_ID, 100, SESSION_NAME)).andReturn(mockKieSession);
+		expect(mockKieSessionProvider.getStatefulKieSession(RELEASE_ID, 100, SESSION_NAME, 10)).andReturn(mockKieSession);
 		
 		replay(mockKieSessionProvider, mockKieSession);
 		KieSession kieSession = new SessionBuilder(mockKieSessionProvider)
@@ -99,7 +101,7 @@ public class SessionBuilderTest {
 	
 	@Test
 	public void fetchNamedStatelfulKieSession_NotFound() {
-		expect(mockKieSessionProvider.getStatefulKieSession(RELEASE_ID, 100, SESSION_NAME)).andReturn(null);
+		expect(mockKieSessionProvider.getStatefulKieSession(RELEASE_ID, 100, SESSION_NAME, 10)).andReturn(null);
 		
 		replay(mockKieSessionProvider);
 		KieSession kieSession = new SessionBuilder(mockKieSessionProvider)

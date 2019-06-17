@@ -16,9 +16,9 @@
 	
 	<properties>
 		<java.version>1.8</java.version>
-		<kie.version>6.5.0.Final</kie.version>
-		<spring.version>4.3.8.RELEASE</spring.version>
-		<slf4j.version>1.7.25</slf4j.version>
+		<kie.version>7.23.0.Final</kie.version>
+		<spring.version>5.1.7.RELEASE</spring.version>
+		<slf4j.version>1.7.26</slf4j.version>
 	</properties>
 
 	<dependencies>
@@ -37,12 +37,12 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.4</version>
+			<version>3.9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
-			<version>4.1</version>
+			<version>4.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -81,7 +81,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.7.8</version>
+				<version>0.8.4</version>
 				<executions>
 					<execution>
 						<id>pre-unit-test</id>
@@ -104,7 +104,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
-					<encoding>${project.build.sourceEncoding}</encoding>
+					<encoding>UTF-8</encoding>
 					<additionalparam>-Xdoclint:none</additionalparam>
 				</configuration>
 			</plugin>

@@ -34,13 +34,13 @@ import org.springframework.util.Assert;
 
 
 public class DroolsTestExecutionListener extends DependencyInjectionTestExecutionListener {
-	private static Logger LOG = LoggerFactory.getLogger(DroolsTestExecutionListener.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DroolsTestExecutionListener.class);
 	private KieContainer kieContainer;
 	private KieRuntimeLogger logger = null;
 	private KieServices kieServices;
 	
 	@Override
-	public void beforeTestClass(TestContext testContext) throws Exception {
+	public void beforeTestClass(TestContext testContext) {
 		String[] releaseId = extractReleaseId(testContext);
 		this.kieServices = KieServices.Factory.get();
 		this.kieContainer = kieServices.newKieContainer(kieServices.newReleaseId(releaseId[0], releaseId[1], releaseId[2]));
@@ -75,7 +75,7 @@ public class DroolsTestExecutionListener extends DependencyInjectionTestExecutio
 	}
 
 	@Override
-	public void afterTestClass(TestContext testContext) throws Exception {
+	public void afterTestClass(TestContext testContext) {
 		this.kieContainer = null;
 		this.kieServices = null;
 		testContext.markApplicationContextDirty(HierarchyMode.EXHAUSTIVE);
@@ -86,8 +86,8 @@ public class DroolsTestExecutionListener extends DependencyInjectionTestExecutio
 	}
 	
 	@Override
-	public void beforeTestMethod(TestContext testContext) throws Exception {
-		LOG.info("\n"+testContext.getTestMethod().getName());
+	public void beforeTestMethod(TestContext testContext) {
+		LOG.info("\n{}", testContext.getTestMethod().getName());
 		LOG.info("=================");
 	}
 	

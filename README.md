@@ -5,7 +5,7 @@
 # Version
 - JDK 8
 - Maven: 3.x
-- Spring: 5.7.x
+- Spring: 5.1.x
 - Drools: 7.23.0.Final
 
 ## Getting started

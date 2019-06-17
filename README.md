@@ -5,8 +5,8 @@
 # Version
 - JDK 8
 - Maven: 3.x
-- Spring: 4.3.x
-- Drools: 6.5.0.Final
+- Spring: 5.7.x
+- Drools: 7.23.0.Final
 
 ## Getting started
 - Download this project
@@ -24,6 +24,7 @@
 		StatelessKieSession statelessKieSession = new SessionBuilder(kieSessionProvider)
 			.forKnowledgeModule("foo.bar:bar-knowledge:1.0.0")
 			.pollingIntervalMillis(100) //Optional
+			.sessionPoolSize(5) //Optiona. Defaulted to pool size of 10
 			.fetchStatelessKieSession("bar.kbase.stateless.session");  //No-arg method will fetch default session
 			
 ### Get a stateful Kie session:
@@ -135,6 +136,6 @@ This IT specific feature generates a drools audit log with the rules that got ex
 	- Rules that got fired along with performance stat is printed in the console
 	
 # Reference
-- [Drools 6.5.0.Final reference](https://docs.jboss.org/drools/release/6.5.0.Final/drools-docs/html_single/#d0e1087)
+- [Drools 7.23.0.Final reference](https://docs.jboss.org/drools/release/7.23.0.Final/drools-docs/html_single/)
 - [Drools testing using Cucumber](https://github.com/anair-it/drools-cucumber)
 	
